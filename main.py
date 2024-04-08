@@ -264,8 +264,6 @@ def main_worker(gpu, ngpus_per_node, args):
         adjust_learning_rate(optimizer, epoch, args)
         acc_train, cls_loss, con_loss, time = train(train_loader, model, criterion, optimizer, epoch, args, logger)
 
-        # scheduler_warmup.step()  # 新加
-
         acc_test, top_5 = test(model, test_loader, args, epoch, logger)
         print('Epoch: {}. Train Acc: {}. Te Acc: {}. Time: {}.'.format(epoch + 1, acc_train, acc_test, time))
         save_table[epoch, :] = epoch + 1, acc_train, acc_test, top_5
@@ -311,10 +309,7 @@ def train(train_loader, model, criterion, optimizer, epoch, args, tb_logger):
         comp_loss = log_loss(cls_out, (1 - com_label).clone())
         con_loss = criterion(con_out, con_target)  # contrastive loss
 
-        if args.lam < 0:
-            lam = -args.lam
-        else:
-            lam = min((epoch / 100) * args.lam, args.lam)
+        lam = min((epoch / 100) * args.lam, args.lam)
         loss = comp_loss + lam*con_loss
 
         loss_cls_log.update(comp_loss.item())
