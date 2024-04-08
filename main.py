@@ -46,7 +46,7 @@ parser.add_argument('--exp-dir', default='experiment', type=str,
                     help='experiment directory for saving checkpoints and logs')
 parser.add_argument('--seed', default=123, type=int,
                     help='seed for initializing training. ')
-parser.add_argument('--method', default='ComConWeight', type=str, choices=['ComConNegative', 'ComConWeight', "ComWeight"],
+parser.add_argument('--method', default='ComWeight', type=str, choices=['ComSifted', 'ComWeight', "ComSoft"],
                     help='the method for representation')
 parser.add_argument('--epochs', default=200, type=int,
                     help='number of total epochs to run')
@@ -253,7 +253,7 @@ def main_worker(gpu, ngpus_per_node, args):
 
     best_acc = 0
     mmc = 0  # mean max confidence
-    save_table = np.zeros(shape=(args.epochs, 7))
+    save_table = np.zeros(shape=(args.epochs, 4))
 
     for epoch in range(args.start_epoch, args.epochs):
         # scheduler_warmup.step(epoch)
@@ -268,7 +268,7 @@ def main_worker(gpu, ngpus_per_node, args):
 
         acc_test, top_5 = test(model, test_loader, args, epoch, logger)
         print('Epoch: {}. Train Acc: {}. Te Acc: {}. Time: {}.'.format(epoch + 1, acc_train, acc_test, time))
-        save_table[epoch, :] = epoch + 1, acc_train, acc_test, top_5, cls_loss, con_loss, time
+        save_table[epoch, :] = epoch + 1, acc_train, acc_test, top_5
 
         if not os.path.exists("./rebuttal/{method}/".format(method=args.method)):
             os.makedirs("./rebuttal/{method}/".format(method=args.method))
